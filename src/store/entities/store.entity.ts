@@ -14,6 +14,9 @@ export class Store {
   name!: string;
 
   @Column({ type: 'text', nullable: false })
+  code!: string;
+
+  @Column({ type: 'text', nullable: false })
   direction!: string;
 
   @Column({ type: 'text', nullable: true })

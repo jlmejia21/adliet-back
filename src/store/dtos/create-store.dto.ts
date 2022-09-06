@@ -5,6 +5,9 @@ export class CreateStoreDto {
   name: string;
 
   @IsString()
+  code: string;
+
+  @IsString()
   direction: string;
 
   @IsString()

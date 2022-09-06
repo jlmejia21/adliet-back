@@ -1,12 +1,10 @@
 import { hash } from 'bcryptjs';
-import { Post } from 'src/post/entities/post.entity';
 import {
   BeforeInsert,
   BeforeUpdate,
   Column,
   CreateDateColumn,
   Entity,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -32,6 +30,9 @@ export class User {
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
+
+  @Column({ type: 'varchar', length: 255 })
+  role: string;
 
   // @OneToOne(_ => Post, post => post.author, {cascade: true})
   // posts: Post;

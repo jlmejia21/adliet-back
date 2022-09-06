@@ -24,6 +24,11 @@ export class CreateUserDto {
   @MaxLength(128)
   password: string;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(255)
+  role: string;
+
   // @IsArray()
   // @IsEnum(AppRoles, {
   //   each: true,

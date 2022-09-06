@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateStoreDto, EditStoreDto } from './dtos';
@@ -16,6 +17,16 @@ import { StoreService } from './store.service';
 @Controller('store')
 export class StoreController {
   constructor(private readonly storeService: StoreService) {}
+
+  @Get('/search')
+  async querySql(
+    @Query('store') store: string,
+    @Query('start_date') start_date: string,
+    @Query('end_date') end_date: string,
+  ) {
+    const data = await this.storeService.search(store, start_date, end_date);
+    return { data };
+  }
 
   @Get()
   async getMany() {
