@@ -34,8 +34,8 @@ export class User {
   @Column({ type: 'varchar', length: 255 })
   role: string;
 
-  // @OneToOne(_ => Post, post => post.author, {cascade: true})
-  // posts: Post;
+  @Column({ type: 'int', nullable: true })
+  id_store: number;
 
   @BeforeInsert()
   @BeforeUpdate()

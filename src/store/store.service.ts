@@ -26,10 +26,11 @@ export class StoreService {
       pd.id as process_detail_id,
       p.date,
       p.start_time,
-      p.end_time
+      p.end_time,
+      pd.completed
       FROM processes p
       inner join processes_detail pd on p.id = pd.id_process
-      inner join stores s on s.code = pd.code_store
+      inner join stores s on s.id = pd.id_store
       inner join orders o on o.id = pd.id_order
       inner join customers c on c.id = o.id_customer
       where  1 = 1
@@ -37,7 +38,6 @@ export class StoreService {
       and date >= ?
       and date <= ?
     `;
-
     return this.connection.query(query, [
       start_date === 'null' ? start_date_default : start_date,
       end_date === 'null' ? end_date_default : end_date,
@@ -48,23 +48,23 @@ export class StoreService {
     return await this.storeRepository.find();
   }
   async getOne(id: number) {
-    const post = await this.storeRepository.findOne({
+    const store = await this.storeRepository.findOne({
       where: { id: id },
     });
-    if (!post) throw new NotFoundException('Post does not exist');
-    return post;
+    if (!store) throw new NotFoundException('Store does not exist');
+    return store;
   }
   async createOne(dto: CreateStoreDto) {
     const post = this.storeRepository.create(dto as any);
     return await this.storeRepository.save(post);
   }
   async editOne(id: number, dto: EditStoreDto) {
-    const post = await this.storeRepository.findOne({
+    const store = await this.storeRepository.findOne({
       where: { id: id },
     });
-    if (!post) throw new NotFoundException('Store does not exist');
-    const editedPost = Object.assign(post, dto);
-    return await this.storeRepository.save(editedPost);
+    if (!store) throw new NotFoundException('Store does not exist');
+    const editedStore = Object.assign(store, dto);
+    return await this.storeRepository.save(editedStore);
   }
   async deleteOne(id: number) {
     return await this.storeRepository.delete(id);

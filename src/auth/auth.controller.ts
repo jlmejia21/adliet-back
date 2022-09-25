@@ -17,7 +17,7 @@ export class AuthController {
     const data = await this.authService.login(user);
 
     return {
-      message: 'Login exitos',
+      message: 'Login exitoso',
       data,
     };
   }

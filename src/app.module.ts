@@ -12,12 +12,12 @@ import {
   DATABASE_PORT,
   DATABASE_USERNAME,
 } from './config/constants';
-import { PostModule } from './post/post.module';
 import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './app.roles';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -43,9 +43,10 @@ import { roles } from './app.roles';
     }),
     AccessControlModule.forRoles(roles),
     UserModule,
-    PostModule,
+    // PostModule,
     StoreModule,
     AuthModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
