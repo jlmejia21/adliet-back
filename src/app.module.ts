@@ -6,7 +6,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import {
-  DATABASE_CERT,
   DATABASE_HOST,
   DATABASE_NAME,
   DATABASE_PASSWORD,
@@ -32,9 +31,6 @@ import { OrderModule } from './order/order.module';
         password: config.get<string>(DATABASE_PASSWORD),
         database: config.get<string>(DATABASE_NAME),
         entities: [__dirname + './**/**/*entity{.ts,.js}'],
-        ssl: {
-          ca: config.get<string>(DATABASE_CERT),
-        },
         autoLoadEntities: true,
         synchronize: true,
         logging: true,
