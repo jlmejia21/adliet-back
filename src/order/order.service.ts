@@ -19,7 +19,7 @@ export class OrderService {
       inner join stores s on pd.id_store=s.id
       inner join orders o on pd.id_order = o.id
       inner join customers c on c.id = o.id_customer
-      where  1 = 1
+      where 1 = 1
       and pd.completed = false
       and ( ${store} IS NULL OR pd.id_store = ${store} )
     `;
