@@ -1,20 +1,41 @@
-import { Body, Controller, Get, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
+import { CreateOrderDto } from './dtos';
 import { OrderService } from './order.service';
 
 @ApiTags('Order')
-@Controller('Order')
+@Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  @Get('/search')
-  async querySql(@Query('store') store: string) {
-    const data = await this.orderService.search(store);
-    return { data };
+  @Get()
+  async getMany() {
+    const data = await this.orderService.getMany();
+    return {
+      message: 'Peticion correcta',
+      data,
+    };
   }
 
-  @Put('/completed')
-  editOne(@Body() body: any) {
-    return this.orderService.updateCompleted(body.id);
+  @Get(':id')
+  getOne(@Param('id', ParseIntPipe) id: number) {
+    return this.orderService.getOne(id);
+  }
+
+  @Post()
+  createOne(@Body() dto: CreateOrderDto) {
+    return this.orderService.createOne(dto);
+  }
+  @Delete(':id')
+  deleteOne(@Param('id', ParseIntPipe) id: number) {
+    return this.orderService.deleteOne(id);
   }
 }

@@ -1,39 +1,39 @@
-import { Injectable } from '@nestjs/common';
-import { InjectConnection } from '@nestjs/typeorm';
-import { Connection } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { CreateOrderDto } from './dtos';
+import { Order } from './entities/order.entity';
 @Injectable()
 export class OrderService {
-  constructor(@InjectConnection() private readonly connection: Connection) {}
+  constructor(
+    @InjectRepository(Order)
+    private readonly orderRepository: Repository<Order>,
+  ) {}
 
-  async search(store: string) {
-    const query = `
-    SELECT
-      pd.id as id_processes_detail, 
-      o.id as id_order,
-      concat(c.name, ' ', c.last_name) as cliente,
-      c.latitude,
-      c.longitude,
-      pd.completed,
-      pd.id_store
-      FROM processes_detail pd
-      inner join stores s on pd.id_store=s.id
-      inner join orders o on pd.id_order = o.id
-      inner join customers c on c.id = o.id_customer
-      where 1 = 1
-      and pd.completed = false
-      and ( ${store} IS NULL OR pd.id_store = ${store} )
-    `;
-
-    return this.connection.query(query);
+  async getMany(): Promise<Order[]> {
+    return await this.orderRepository.find({
+      relations: {
+        process: true,
+        store: true,
+      },
+    });
   }
-
-  async updateCompleted(id: any) {
-    const query = `
-    UPDATE processes_detail
-      set completed = true
-      where  1 = 1
-      and id=${id}
-    `;
-    return this.connection.query(query);
+  async getOne(id: number) {
+    const post = await this.orderRepository.findOne({
+      where: { id: id },
+      relations: {
+        process: true,
+        store: true,
+      },
+    });
+    if (!post) throw new NotFoundException('Order does not exist');
+    return post;
+  }
+  async createOne(dto: CreateOrderDto) {
+    const post = this.orderRepository.create(dto as any);
+    return await this.orderRepository.save(post);
+  }
+  async deleteOne(id: number) {
+    return await this.orderRepository.delete(id);
   }
 }

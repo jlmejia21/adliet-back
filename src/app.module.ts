@@ -18,6 +18,7 @@ import { UserModule } from './user/user.module';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './app.roles';
 import { OrderModule } from './order/order.module';
+import { ProcessModule } from './process/process.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { OrderModule } from './order/order.module';
     StoreModule,
     AuthModule,
     OrderModule,
+    ProcessModule,
   ],
   controllers: [AppController],
   providers: [AppService],
