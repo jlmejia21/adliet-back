@@ -38,20 +38,20 @@ export class ProcessService {
     return post;
   }
   async createOne(dto) {
-    const process = this.processRepository.create(dto as any);
-    const processSaved = await this.processRepository.save(process);
+    const newProcess = this.processRepository.create(dto as any);
+    const process = await this.processRepository.save(newProcess);
     const ordersSaved = [];
     dto.orders.forEach(async (order) => {
       const store = await this.storeRepository.findOne({
         where: { id: order.store_id },
       });
-      order.process = processSaved;
+      order.process = process;
       order.store = store;
       this.orderRepository.create(order);
       const orderSaved = await this.orderRepository.save(order);
       ordersSaved.push(orderSaved);
     });
-    return { processSaved };
+    return process;
   }
   async deleteOne(id: number) {
     return await this.processRepository.delete(id);
