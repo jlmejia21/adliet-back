@@ -46,7 +46,6 @@ export class OrderController {
 
   @Post('/find')
   async getOrdersByCodes(@Body() request) {
-    console.log(request);
     const data = await this.orderService.getOrdersByCodes(request);
     return {
       message: 'Peticion correcta',

@@ -1,5 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import * as Excel from 'exceljs';
+import { transporter } from 'src/config/mailer';
 import { Order } from 'src/order/entities/order.entity';
 import { Store } from 'src/store/entities/store.entity';
 import { Repository } from 'typeorm';
@@ -55,5 +57,70 @@ export class ProcessService {
   }
   async deleteOne(id: number) {
     return await this.processRepository.delete(id);
+  }
+
+  async sendEmail(dto) {
+    const { id } = dto;
+    const filename = `Procesing_${id}.xlsx`;
+    const workbook = new Excel.Workbook();
+    const worksheet = workbook.addWorksheet(`Procesing_${id}`);
+
+    const post = await this.processRepository.findOne({
+      where: { id: id },
+      relations: {
+        orders: {
+          store: true,
+        },
+      },
+    });
+    if (!post) throw new NotFoundException('Process does not exist');
+
+    worksheet.columns = [
+      { header: 'ID', key: 'id' },
+      { header: 'LATITUD', key: 'latitude' },
+      { header: 'LONGITUD', key: 'longitude' },
+      { header: 'TIENDA ASIGNADA', key: 'assignedStore' },
+      { header: 'CODIGO TIENDA', key: 'assignedStoreCode' },
+      { header: 'TIENDA LATITUD', key: 'storeLatitude' },
+      { header: 'TIENDA LONGITUD', key: 'storeLongitude' },
+    ];
+
+    const data = post.orders.map((order) => {
+      const obj = {
+        id: order.code,
+        latitude: order.latitude,
+        longitude: order.longitude,
+        assignedStore: order.store.name,
+        assignedStoreCode: order.store.code,
+        storeLatitude: order.store.latitude,
+        storeLongitude: order.store.longitude,
+      };
+
+      return obj;
+    });
+
+    data.forEach((e) => {
+      worksheet.addRow(e);
+    });
+    const buffer = await workbook.xlsx.writeBuffer();
+
+    transporter.sendMail({
+      from: '"El proceso se asignaciones genero correctamente ✅" <adliet@falabella.com.pe>',
+      to: 'u201525319@upc.edu.pe',
+      subject: `Proceso #${id}`,
+      html: `
+      <p>Buenas tardes,</p>
+      <p>Adjunto el reporte de asignaciones de pedidos.</p>
+      <p>Saludos.</p>
+      `,
+      attachments: [
+        {
+          filename,
+          content: buffer,
+          contentType:
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        },
+      ],
+    });
   }
 }

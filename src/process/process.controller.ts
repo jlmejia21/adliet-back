@@ -29,6 +29,14 @@ export class ProcessController {
     return this.processService.getOne(id);
   }
 
+  @Post('sendEmail')
+  async sendEmail(@Body() id) {
+    await this.processService.sendEmail(id);
+    return {
+      message: 'Se envio la notificacion satisfactoriamente.',
+    };
+  }
+
   @Post()
   createOne(@Body() dto) {
     return this.processService.createOne(dto);
