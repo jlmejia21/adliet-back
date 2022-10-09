@@ -1,7 +1,7 @@
+import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as Excel from 'exceljs';
-import { transporter } from 'src/config/mailer';
 import { Order } from 'src/order/entities/order.entity';
 import { Store } from 'src/store/entities/store.entity';
 import { Repository } from 'typeorm';
@@ -16,6 +16,7 @@ export class ProcessService {
     private readonly orderRepository: Repository<Order>,
     @InjectRepository(Store)
     private readonly storeRepository: Repository<Store>,
+    private mailerService: MailerService,
   ) {}
 
   async getMany(): Promise<Process[]> {
@@ -104,15 +105,34 @@ export class ProcessService {
     });
     const buffer = await workbook.xlsx.writeBuffer();
 
-    transporter.sendMail({
+    // transporter.sendMail({
+    //   from: '"El proceso se asignaciones genero correctamente ✅" <adliet@falabella.com.pe>',
+    //   to: 'u201525319@upc.edu.pe',
+    //   subject: `Proceso #${id}`,
+    //   html: `
+    //   <p>Buenas tardes,</p>
+    //   <p>Adjunto el reporte de asignaciones de pedidos.</p>
+    //   <p>Saludos.</p>
+    //   `,
+    //   attachments: [
+    //     {
+    //       filename,
+    //       content: buffer,
+    //       contentType:
+    //         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    //     },
+    //   ],
+    // });
+
+    this.mailerService.sendMail({
       from: '"El proceso se asignaciones genero correctamente ✅" <adliet@falabella.com.pe>',
       to: 'u201525319@upc.edu.pe',
       subject: `Proceso #${id}`,
       html: `
-      <p>Buenas tardes,</p>
-      <p>Adjunto el reporte de asignaciones de pedidos.</p>
-      <p>Saludos.</p>
-      `,
+        <p>Buenas tardes,</p>
+        <p>Adjunto el reporte de asignaciones de pedidos.</p>
+        <p>Saludos.</p>
+        `,
       attachments: [
         {
           filename,

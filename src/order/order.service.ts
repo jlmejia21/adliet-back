@@ -110,11 +110,11 @@ export class OrderService {
       .innerJoinAndSelect('orders.store', 'store')
       .select('store.name')
       .addSelect(
-        'SUM(CASE WHEN orders.STATUS = "1"  THEN 1 ELSE 0 END)',
+        'SUM(CASE WHEN orders.status = true THEN 1 ELSE 0 END)',
         'sent',
       )
       .addSelect(
-        'SUM(CASE WHEN orders.STATUS = "0"  THEN 1 ELSE 0 END)',
+        'SUM(CASE WHEN orders.status = false  THEN 1 ELSE 0 END)',
         'not_sent',
       )
       .groupBy('store.name')
@@ -123,33 +123,40 @@ export class OrderService {
   }
 
   async getOrdersByStoreGroupByDate() {
-    const query = `
-    SELECT
-    ST.NAME as name,
-    (
-    SELECT 
-    count(O.ID) AS CANTIDAD_YEAR
-    FROM STORES S LEFT JOIN ORDERS O ON (O.STORE_ID = S.ID AND YEAR(O.CREATED_AT) = YEAR(CURDATE()))
-    WHERE ST.ID = S.ID
-    GROUP BY S.ID
-    ) orders_year,
-    (
-    SELECT 
-    count(O.ID) AS CANTIDAD_MONTH
-    FROM STORES S LEFT JOIN ORDERS O ON (O.STORE_ID = S.ID AND  YEAR(O.CREATED_AT) = YEAR(CURDATE()) AND MONTH(O.CREATED_AT) = MONTH(CURDATE()))
-    WHERE  ST.ID = S.ID
-    GROUP BY S.ID
-    ) orders_month,
-    (
-    SELECT 
-    count(O.ID) AS CANTIDAD_DAY
-    FROM  STORES S LEFT JOIN  ORDERS O ON (O.STORE_ID = S.ID AND YEAR(O.CREATED_AT) = YEAR(CURDATE()) AND MONTH(O.CREATED_AT) = MONTH(CURDATE()) AND DAY(O.CREATED_AT) = DAY(CURDATE()))
-    WHERE ST.ID = S.ID
-    GROUP BY S.ID
-    ) orders_day
-    FROM STORES ST
-    `;
-    return this.connection.query(query);
+    let result: any;
+    try {
+      const query = `
+      select
+      st.name as name,
+      (
+      select 
+      count(o.id) as cantidad_year
+      from stores s left join orders o on (o.store_id = s.id and year(o.created_at) = year(curdate()))
+      where st.id = s.id
+      group by s.id
+      ) orders_year,
+      (
+      select 
+      count(o.id) as cantidad_month
+      from stores s left join orders o on (o.store_id = s.id and  year(o.created_at) = year(curdate()) and month(o.created_at) = month(curdate()))
+      where  st.id = s.id
+      group by s.id
+      ) orders_month,
+      (
+      select 
+      count(o.id) as cantidad_day
+      from  stores s left join  orders o on (o.store_id = s.id and year(o.created_at) = year(curdate()) and month(o.created_at) = month(curdate()) and day(o.created_at) = day(curdate()))
+      where st.id = s.id
+      group by s.id
+      ) orders_day
+      from stores st;
+      `;
+
+      result = await this.connection.query(query);
+    } catch (error) {
+      result = [];
+    }
+    return result;
   }
 
   async getMany(): Promise<Order[]> {
