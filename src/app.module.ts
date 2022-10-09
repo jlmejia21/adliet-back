@@ -20,7 +20,6 @@ import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 
 import { MailerModule } from '@nestjs-modules/mailer';
-import * as fs from 'fs';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './app.roles';
 import { EmailModule } from './email/email.module';
@@ -39,7 +38,8 @@ import { ProcessModule } from './process/process.module';
         password: config.get<string>(DATABASE_PASSWORD),
         database: config.get<string>(DATABASE_NAME),
         ssl: {
-          ca: fs.readFileSync(config.get<string>(DATABASE_CERT)),
+          rejectUnauthorized: true,
+          ca: config.get<string>(DATABASE_CERT),
         },
         entities: [__dirname + './**/**/*entity{.ts,.js}'],
         autoLoadEntities: true,
