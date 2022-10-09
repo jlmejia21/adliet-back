@@ -64,7 +64,7 @@ import { ProcessModule } from './process/process.module';
     }),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: '.env',
+      envFilePath: '.env.dev',
     }),
     AccessControlModule.forRoles(roles),
     UserModule,
