@@ -44,6 +44,15 @@ export class OrderController {
     };
   }
 
+  @Get('/store/all/:id')
+  async getAllOrdersByStore(@Param('id', ParseIntPipe) id: number) {
+    const data = await this.orderService.getOrdersPendingByStore(id);
+    return {
+      message: 'Peticion correcta',
+      data,
+    };
+  }
+
   @Post('/find')
   async getOrdersByCodes(@Body() request) {
     const data = await this.orderService.getOrdersByCodes(request);

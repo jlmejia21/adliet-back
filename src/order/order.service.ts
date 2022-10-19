@@ -61,6 +61,20 @@ export class OrderService {
     });
   }
 
+  async getAllOrdersByStore(id: number): Promise<Order[]> {
+    return await this.orderRepository.find({
+      where: {
+        store: {
+          id,
+        },
+      },
+      relations: {
+        process: true,
+        store: true,
+      },
+    });
+  }
+
   async getOrdersPendingByStore(id: number): Promise<Order[]> {
     return await this.orderRepository.find({
       where: {
