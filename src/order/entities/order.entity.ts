@@ -26,6 +26,9 @@ export class Order {
   @Column({ type: 'bool', default: false })
   status: boolean;
 
+  @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
+  completedAt: Date;
+
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
   createdAt: Date;
 

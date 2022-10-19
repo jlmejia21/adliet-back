@@ -10,5 +10,6 @@ import { ProcessService } from './process.service';
   imports: [TypeOrmModule.forFeature([Process, Order, Store])],
   controllers: [ProcessController],
   providers: [ProcessService],
+  exports: [ProcessService],
 })
 export class ProcessModule {}

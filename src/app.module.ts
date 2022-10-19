@@ -20,6 +20,7 @@ import { StoreModule } from './store/store.module';
 import { UserModule } from './user/user.module';
 
 import { MailerModule } from '@nestjs-modules/mailer';
+import { ScheduleModule } from '@nestjs/schedule';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './app.roles';
 import { EmailModule } from './email/email.module';
@@ -28,6 +29,7 @@ import { ProcessModule } from './process/process.module';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

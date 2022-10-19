@@ -90,6 +90,7 @@ export class OrderService {
     });
     if (!order) throw new NotFoundException('Order does not exist');
     order.status = true;
+    order.completedAt = new Date();
     return await this.orderRepository.save(order);
   }
 
