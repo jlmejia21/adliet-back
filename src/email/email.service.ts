@@ -11,6 +11,7 @@ import {
   EMAIL_HOST_READ,
   EMAIL_PASSWORD,
   EMAIL_USER,
+  END_POINT_KMEANS,
 } from 'src/config/constants';
 import { OrderService } from 'src/order/order.service';
 import { ProcessService } from 'src/process/process.service';
@@ -189,7 +190,7 @@ export class EmailService {
       await this.sendEmailWithAllOrdersExisted();
       return [];
     }
-    const url = 'http://127.0.0.1:5000/json';
+    const url = `${this.config.get<string>(END_POINT_KMEANS)}/json`;
     const assignations = [];
     for (const email of emails) {
       const { attachments } = email;

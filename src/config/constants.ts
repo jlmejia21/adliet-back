@@ -10,3 +10,4 @@ export const EMAIL_HOST = 'EMAIL_HOST';
 export const EMAIL_HOST_READ = 'EMAIL_HOST_READ';
 export const EMAIL_USER = 'EMAIL_USER';
 export const EMAIL_PASSWORD = 'EMAIL_PASSWORD';
+export const END_POINT_KMEANS = 'END_POINT_KMEANS';
