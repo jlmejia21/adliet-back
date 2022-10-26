@@ -44,16 +44,16 @@ export class ProcessService {
     const newProcess = this.processRepository.create(dto as any);
     const process = await this.processRepository.save(newProcess);
     const ordersSaved = [];
-    dto.orders.forEach(async (order) => {
+    for (const order of dto.orders) {
       const store = await this.storeRepository.findOne({
         where: { id: order.store_id },
       });
       order.process = process;
       order.store = store;
-      this.orderRepository.create(order);
-      const orderSaved = await this.orderRepository.save(order);
+      const orderCreated = this.orderRepository.create(order);
+      const orderSaved = await this.orderRepository.save(orderCreated);
       ordersSaved.push(orderSaved);
-    });
+    }
     return process;
   }
   async deleteOne(id: number) {
@@ -66,7 +66,7 @@ export class ProcessService {
     const workbook = new Excel.Workbook();
     const worksheet = workbook.addWorksheet(`Procesing_${id}`);
 
-    const post = await this.processRepository.findOne({
+    const process = await this.processRepository.findOne({
       where: { id: id },
       relations: {
         orders: {
@@ -74,7 +74,7 @@ export class ProcessService {
         },
       },
     });
-    if (!post) throw new NotFoundException('Process does not exist');
+    if (!process) throw new NotFoundException('Process does not exist');
 
     worksheet.columns = [
       { header: 'ID', key: 'id' },
@@ -85,8 +85,7 @@ export class ProcessService {
       { header: 'TIENDA LATITUD', key: 'storeLatitude' },
       { header: 'TIENDA LONGITUD', key: 'storeLongitude' },
     ];
-
-    const data = post.orders.map((order) => {
+    const data = process.orders.map((order) => {
       const obj = {
         id: order.code,
         latitude: order.latitude,
@@ -104,25 +103,6 @@ export class ProcessService {
       worksheet.addRow(e);
     });
     const buffer = await workbook.xlsx.writeBuffer();
-
-    // transporter.sendMail({
-    //   from: '"El proceso se asignaciones genero correctamente ✅" <adliet@falabella.com.pe>',
-    //   to: 'u201525319@upc.edu.pe',
-    //   subject: `Proceso #${id}`,
-    //   html: `
-    //   <p>Buenas tardes,</p>
-    //   <p>Adjunto el reporte de asignaciones de pedidos.</p>
-    //   <p>Saludos.</p>
-    //   `,
-    //   attachments: [
-    //     {
-    //       filename,
-    //       content: buffer,
-    //       contentType:
-    //         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    //     },
-    //   ],
-    // });
 
     this.mailerService.sendMail({
       from: '"El proceso se asignaciones genero correctamente ✅" <adliet@falabella.com.pe>',

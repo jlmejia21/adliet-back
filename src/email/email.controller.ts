@@ -8,9 +8,9 @@ export class EmailController {
   constructor(private readonly emailService: EmailService) {}
   @Get()
   async readInbox() {
-    console.time('Proceso de 500 registros');
+    // console.time('Proceso de 500 registros');
     const result = await this.emailService.getEmails();
-    console.timeEnd('Proceso de 500 registros');
+    // console.timeEnd('Proceso de 500 registros');
     return {
       message: 'Peticion correcta ',
       result: result,
