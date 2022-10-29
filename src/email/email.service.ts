@@ -39,6 +39,7 @@ export class EmailService {
     const logger = new Logger();
     logger.log('Se esta ejecutando logger 5am');
   }
+
   @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   log() {
     const logger = new Logger();

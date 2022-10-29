@@ -16,6 +16,7 @@ export class EmailController {
   @Get()
   async readInbox() {
     // console.time('Proceso de 265 registros');
+    console.time('Proceso de 265 registros');
     const event = await this.eventService.createOne(
       this.initEvent(EventCategory.Inicio, EventDescription.Inicio, null),
     );
@@ -48,6 +49,7 @@ export class EmailController {
     }
 
     // console.timeEnd('Proceso de 265 registros');
+    console.timeEnd('Proceso de 265 registros');
 
     return {
       message: 'Peticion correcta ',
