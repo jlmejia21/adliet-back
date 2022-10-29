@@ -24,6 +24,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from './app.roles';
 import { EmailModule } from './email/email.module';
+import { EventModule } from './event/event.module';
 import { OrderModule } from './order/order.module';
 import { ProcessModule } from './process/process.module';
 
@@ -75,6 +76,7 @@ import { ProcessModule } from './process/process.module';
     OrderModule,
     ProcessModule,
     EmailModule,
+    EventModule,
   ],
   controllers: [AppController],
   providers: [AppService],

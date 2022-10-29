@@ -34,10 +34,10 @@ export class EmailService {
     tlsOptions: { rejectUnauthorized: false },
   };
 
-  @Cron(CronExpression.EVERY_DAY_AT_11PM)
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
   log() {
     const logger = new Logger();
-    logger.log('Cron example');
+    logger.log('Se esta ejecutando la tarea autoamtica');
     // this.getEmails();
   }
 
@@ -97,12 +97,16 @@ export class EmailService {
           if (emails.length > 0) {
             const results = await this.validateService(emails);
             const processes = [];
-            for (const result of results) {
+            const processPromises = results.map((result) => {
               const mapOrders = this.mapOrders(result);
-              const process = await this.processService.createOne(mapOrders);
-              await this.processService.sendEmail(process);
+              return this.processService.createOne(mapOrders);
+            });
+            const resultProcesses = await Promise.all(processPromises);
+            const emailPromises = resultProcesses.map((process) => {
               processes.push(process);
-            }
+              return this.processService.sendEmail(process);
+            });
+            await Promise.all(emailPromises);
             resolve(processes);
           }
           console.log('Connection ended');
@@ -192,11 +196,16 @@ export class EmailService {
     }
     const url = `${this.config.get<string>(END_POINT_KMEANS)}/json`;
     const assignations = [];
-    for (const email of emails) {
+
+    const resultPromises = emails.map((email) => {
       const { attachments } = email;
-      const result = await lastValueFrom(this.http.post(url, attachments));
+      return lastValueFrom(this.http.post(url, attachments));
+    });
+    const results = await Promise.all(resultPromises);
+    results.map((result) => {
       assignations.push(result.data);
-    }
+    });
+
     return assignations;
   }
 
@@ -245,17 +254,31 @@ export class EmailService {
   async validateIfAllOrdersExisted(emails: any[]) {
     let isValid = true;
 
-    const mapEmails = await Promise.all(
-      emails.map(async (email) => {
-        const codes = email.attachments.map((row) => row.ID) as any[];
-        const ordersProcessed = await this.orderService.getOrdersByCodes({
-          codes,
-        });
-        const notProceedOrders =
-          email.attachments.length - ordersProcessed.length;
-        return { ...email, isValid: notProceedOrders > 0 };
-      }),
-    );
+    const ordersProcessedPromises = emails.map((email) => {
+      const codes = email.attachments.map((row) => row.ID) as any[];
+      return this.orderService.getOrdersByCodes({
+        codes,
+      });
+    });
+    const resultOrdersProcessed = await Promise.all(ordersProcessedPromises);
+
+    const mapEmails = resultOrdersProcessed.map((ordersProcessed, index) => {
+      const notProceedOrders =
+        emails[index].attachments.length - ordersProcessed.length;
+      return { ...emails[index], isValid: notProceedOrders > 0 };
+    });
+
+    // const mapEmails = await Promise.all(
+    //   emails.map(async (email) => {
+    //     const codes = email.attachments.map((row) => row.ID) as any[];
+    //     const ordersProcessed = await this.orderService.getOrdersByCodes({
+    //       codes,
+    //     });
+    //     const notProceedOrders =
+    //       email.attachments.length - ordersProcessed.length;
+    //     return { ...email, isValid: notProceedOrders > 0 };
+    //   }),
+    // );
 
     const emailsValid = mapEmails.filter((email) => email.isValid);
     isValid = emailsValid.length > 0;

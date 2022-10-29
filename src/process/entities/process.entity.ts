@@ -15,7 +15,7 @@ export class Process {
   @Column({ type: 'int' })
   numberOrders!: number;
 
-  @Column({ type: 'datetime', default: () => 'Now()' })
+  @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date!: string;
 
   @CreateDateColumn({ name: 'created_at', type: 'timestamp' })
