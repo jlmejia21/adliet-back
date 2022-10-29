@@ -44,16 +44,35 @@ export class ProcessService {
     const newProcess = this.processRepository.create(dto as any);
     const process = await this.processRepository.save(newProcess);
     const ordersSaved = [];
-    for (const order of dto.orders) {
-      const store = await this.storeRepository.findOne({
+    const storePromises = dto.orders.map((order: any) =>
+      this.storeRepository.findOne({
         where: { id: order.store_id },
-      });
+      }),
+    );
+    const resultStores = await Promise.all(storePromises);
+    const orderPromises = resultStores.map((store, i) => {
+      const order = dto.orders[i];
       order.process = process;
       order.store = store;
       const orderCreated = this.orderRepository.create(order);
-      const orderSaved = await this.orderRepository.save(orderCreated);
-      ordersSaved.push(orderSaved);
-    }
+      return this.orderRepository.save(orderCreated);
+    });
+    const resultOrders = await Promise.all(orderPromises);
+    resultOrders.forEach((order) => {
+      ordersSaved.push(order);
+    });
+
+    // for (const order of dto.orders) {
+    //   const store = await this.storeRepository.findOne({
+    //     where: { id: order.store_id },
+    //   });
+    //   order.process = process;
+    //   order.store = store;
+    //   const orderCreated = this.orderRepository.create(order);
+    //   const orderSaved = await this.orderRepository.save(orderCreated);
+    //   ordersSaved.push(orderSaved);
+    // }
+
     return process;
   }
   async deleteOne(id: number) {
