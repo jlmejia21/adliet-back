@@ -24,7 +24,7 @@ export class EventService {
   }
 
   async createOne(dto: CreateEventDto) {
-    const post = this.eventRepository.create(dto as any);
+    const post = this.eventRepository.create(dto as Event);
     return await this.eventRepository.save(post);
   }
 

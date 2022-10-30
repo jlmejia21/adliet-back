@@ -1,29 +1,37 @@
 import { MailerService } from '@nestjs-modules/mailer';
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { SchedulerRegistry } from '@nestjs/schedule';
+import { CronJob } from 'cron';
 import * as Excel from 'exceljs';
 import * as Imap from 'imap';
 import { simpleParser } from 'mailparser';
 import { lastValueFrom } from 'rxjs';
 import {
+  CRON_EXPRESION,
   EMAIL_HOST_READ,
   EMAIL_PASSWORD,
   EMAIL_USER,
   END_POINT_KMEANS,
 } from 'src/config/constants';
+import { CreateEventDto, EditEventDto } from 'src/event/dtos';
+import { EventCategory } from 'src/event/enums';
+import { EventDescription } from 'src/event/enums/event-description.enum';
+import { EventService } from 'src/event/event.service';
 import { OrderService } from 'src/order/order.service';
 import { ProcessService } from 'src/process/process.service';
 
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit {
   constructor(
     private config: ConfigService,
     private processService: ProcessService,
     private orderService: OrderService,
     private mailerService: MailerService,
     private readonly http: HttpService,
+    private readonly eventService: EventService,
+    private schedulerRegistry: SchedulerRegistry,
   ) {}
   imapConfig = {
     user: this.config.get<string>(EMAIL_USER),
@@ -34,20 +42,74 @@ export class EmailService {
     tlsOptions: { rejectUnauthorized: false },
   };
 
-  @Cron(CronExpression.EVERY_DAY_AT_5AM)
-  log5am() {
-    const logger = new Logger();
-    logger.log('Se esta ejecutando logger 5am');
+  expresion = this.config.get<string>(CRON_EXPRESION);
+
+  onModuleInit() {
+    const job = new CronJob(this.expresion, async () => {
+      const logger = new Logger();
+      logger.log(`Se esta ejecutando la tarea automática:  ${this.expresion}`);
+
+      const event = await this.eventService.createOne(
+        this.initEvent(EventCategory.Inicio, EventDescription.Inicio, null),
+      );
+
+      const result = (await this.runReadInbox()) as any[];
+
+      if (result.length === 0) {
+        await this.eventService.createOne(
+          this.initEvent(
+            EventCategory.Incompleto,
+            EventDescription.Incompleto,
+            null,
+            event.id,
+          ),
+        );
+      } else {
+        await this.eventService.editOne(
+          event.id,
+          this.updateProcessEventId(result[0].id),
+        );
+
+        await this.eventService.createOne(
+          this.initEvent(
+            EventCategory.Completado,
+            EventDescription.Completado,
+            result[0].id,
+            event.id,
+          ),
+        );
+      }
+
+      logger.log(
+        `Termino la ejecucion de la tarea automática :  ${this.expresion}`,
+      );
+    });
+
+    this.schedulerRegistry.addCronJob('JobReadInbox', job);
+    job.start();
   }
 
-  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
-  log() {
-    const logger = new Logger();
-    logger.log('Se esta ejecutando la tarea autoamtica');
-    // this.getEmails();
+  initEvent(
+    category: EventCategory,
+    description: EventDescription,
+    processId: number | null,
+    event_id_ref?: number | null,
+  ) {
+    const eventDTO = new CreateEventDto();
+    eventDTO.category = category;
+    eventDTO.description = description;
+    eventDTO.process_id = processId;
+    eventDTO.event_id_ref = event_id_ref ?? null;
+    return eventDTO;
   }
 
-  getEmails() {
+  updateProcessEventId(id: number) {
+    const eventDTO = new EditEventDto();
+    eventDTO.process_id = id;
+    return eventDTO;
+  }
+
+  runReadInbox() {
     try {
       const imap = new Imap(this.imapConfig);
 

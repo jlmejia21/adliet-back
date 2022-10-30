@@ -15,13 +15,11 @@ export class EmailController {
   ) {}
   @Get()
   async readInbox() {
-    // console.time('Proceso de 265 registros');
-    console.time('Proceso de 265 registros');
     const event = await this.eventService.createOne(
       this.initEvent(EventCategory.Inicio, EventDescription.Inicio, null),
     );
 
-    const result = (await this.emailService.getEmails()) as any[];
+    const result = (await this.emailService.runReadInbox()) as any[];
 
     if (result.length === 0) {
       await this.eventService.createOne(
@@ -29,12 +27,12 @@ export class EmailController {
           EventCategory.Incompleto,
           EventDescription.Incompleto,
           null,
-          event['id'],
+          event.id,
         ),
       );
     } else {
       await this.eventService.editOne(
-        event['id'],
+        event.id,
         this.updateProcessEventId(result[0].id),
       );
 
@@ -43,13 +41,10 @@ export class EmailController {
           EventCategory.Completado,
           EventDescription.Completado,
           result[0].id,
-          event['id'],
+          event.id,
         ),
       );
     }
-
-    // console.timeEnd('Proceso de 265 registros');
-    console.timeEnd('Proceso de 265 registros');
 
     return {
       message: 'Peticion correcta ',
