@@ -138,7 +138,7 @@ export class EmailService implements OnModuleInit {
                   msg.once('attributes', (attrs) => {
                     const { uid } = attrs;
                     imap.addFlags(uid, ['\\Seen'], () => {
-                      console.log('Marked as read!');
+                      // console.log('Marked as read!');
                     });
                   });
                 });
@@ -147,7 +147,7 @@ export class EmailService implements OnModuleInit {
                   return Promise.reject(ex);
                 });
                 f.once('end', () => {
-                  console.log('Done fetching all messages!');
+                  // console.log('Done fetching all messages!');
                   imap.end();
                 });
               },
@@ -177,7 +177,7 @@ export class EmailService implements OnModuleInit {
             await Promise.all(emailPromises);
             resolve(processes);
           }
-          console.log('Connection ended');
+          // console.log('Connection ended');
         });
 
         imap.connect();
