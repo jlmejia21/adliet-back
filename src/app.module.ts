@@ -49,6 +49,7 @@ import { ProcessModule } from './process/process.module';
         synchronize: true,
         logging: true,
         logger: 'file',
+        timezone: 'America/Lima',
       }),
     }),
     MailerModule.forRootAsync({
