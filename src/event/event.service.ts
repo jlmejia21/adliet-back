@@ -12,7 +12,11 @@ export class EventService {
   ) {}
 
   async getMany(): Promise<Event[]> {
-    return await this.eventRepository.find();
+    return await this.eventRepository.find({
+      order: {
+        id: 'DESC',
+      },
+    });
   }
 
   async getOne(id: number) {
